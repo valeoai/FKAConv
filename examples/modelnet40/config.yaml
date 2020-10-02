@@ -1,0 +1,39 @@
+# Dataset
+dataset:
+    dir: /path_to_dataset_dir/
+    name: Modelnet40_ply_hdf5_2048
+    npoints: 2048
+
+# Network
+network:
+    model: KPConvCls
+    backend_conv: 
+        layer: FKAConv
+        kernel_separation: false
+    backend_search: SearchQuantized
+
+
+# Training
+training:
+    savedir: path_to_save_directory
+    batchsize: 64
+    lr_start: 0.001
+    epoch_nbr: 300
+    milestones: 
+        - 100
+        - 150
+        - 200
+        - 225
+        - 250
+        - 275
+
+# Testing
+test:
+    num_iter_per_shape: 16
+    batchsize: 64
+
+# misc
+misc:
+    device: "cuda" 
+    threads: 8
+    disable_tqdm: false

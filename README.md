@@ -22,6 +22,12 @@ It is aimed to change in a near future.
 
 LightConvPoint shall be the base library for point cloud processing while FKAConv shall became the repository dedicated to this specific work.
 
+## Installation
+
+```
+pip install -ve /path/to/fkaconv/repository/
+```
+
 ### Examples
 
 We provide examples classification and segmentation datasets:
