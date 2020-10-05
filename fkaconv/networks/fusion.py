@@ -5,6 +5,7 @@ import lightconvpoint.nn as lcp_nn
 import lightconvpoint.networks as lcp_net
 import os
 from contextlib import nullcontext
+import yaml
 
 class Fusion(nn.Module): # Segsmall with config option for precomputing in the dataloader
 
@@ -31,29 +32,33 @@ class Fusion(nn.Module): # Segsmall with config option for precomputing in the d
         else:
             raise Exception("Error - config dictionnary needed for fusion")
 
-        # option used only at test time to prevent loading the weights twice
-        if 'loadSubModelWeights' in kwargs:
-            loadSubModelWeights = kwargs['loadSubModelWeights']
-        else:
-            loadSubModelWeights = True
+        if self.config["network"]["fusion_submodeldir"] is None:
+            raise Exception("Missing submodeldir esception - for now submodels must be specified")
 
-        self.base_network_rgb = getattr(lcp_net, self.config["network"]["fusion_submodel"][0])(
+        # get the configuration for rgb and noc
+        config_rgb = yaml.load(open(os.path.join(self.config["network"]["fusion_submodeldir"][0], "config.yaml")), Loader=yaml.FullLoader)
+        config_noc = yaml.load(open(os.path.join(self.config["network"]["fusion_submodeldir"][1], "config.yaml")), Loader=yaml.FullLoader)
+
+        # create the networks
+        self.base_network_rgb = getattr(lcp_net, config_rgb["network"]["model"])(
                 in_channels, out_channels, self.ConvNet, self.Search, **kwargs
             )
-        self.base_network_noc = getattr(lcp_net, self.config["network"]["fusion_submodel"][1])(
+        self.base_network_noc = getattr(lcp_net, config_noc["network"]["model"])(
                 in_channels, out_channels, self.ConvNet, self.Search, **kwargs
             )
 
-        if self.config["network"]["fusion_submodeldir"] is not None and loadSubModelWeights:
-            self.base_network_rgb.load_state_dict(
-                torch.load(
-                    os.path.join(
-                        self.config["network"]["fusion_submodeldir"][0], "checkpoint.pth"))["state_dict"])
-            self.base_network_noc.load_state_dict(
-                torch.load(
-                    os.path.join(
-                        self.config["network"]["fusion_submodeldir"][1], "checkpoint.pth"))["state_dict"])
+        # load the weights of the pre-trained models
+        self.base_network_rgb.load_state_dict(
+            torch.load(
+                os.path.join(
+                    self.config["network"]["fusion_submodeldir"][0], "checkpoint.pth"))["state_dict"])
+        self.base_network_noc.load_state_dict(
+            torch.load(
+                os.path.join(
+                    self.config["network"]["fusion_submodeldir"][1], "checkpoint.pth"))["state_dict"])
 
+
+        # define the fusion module
         self.cv1 = lcp_nn.Conv(
                     self.ConvNet(self.base_network_rgb.features_out_size + self.base_network_noc.features_out_size, 96, 16),
                     self.Search(K=16)
@@ -67,6 +72,7 @@ class Fusion(nn.Module): # Segsmall with config option for precomputing in the d
         self.fc = nn.Conv1d(48 + 2*out_channels, out_channels, 1)
         self.drop = nn.Dropout(0.5)
 
+        # set the base network to eval model
         self.freeze=True
         if self.freeze:
             self.base_network_noc.eval()
