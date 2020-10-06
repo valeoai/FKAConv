@@ -1,10 +1,11 @@
 # Dataset
 dataset:
   dir: /path_to_dataset_dir/
-  dataset: S3DIS_aligned_processed
+  dir_tes: /path_to_dataset_dir_test/
+  dataset: SEMANTIC8_processed
   num_points: 8192
-  val_area: 5
-  pillar_size: 2
+  pillar_size: 8
+
 
 # Network
 network:
@@ -33,7 +34,7 @@ training:
 
 # Testing
 test:
-  step: 0.5
+  step: 2
   batch_size: 16
   savepts: false
   savepreds: false

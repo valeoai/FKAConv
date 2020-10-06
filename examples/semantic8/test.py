@@ -15,7 +15,7 @@ import lightconvpoint.utils.metrics as metrics
 from lightconvpoint.utils.network import get_conv, get_search
 import lightconvpoint.utils.transformations as lcp_transfo
 from lightconvpoint.knn import knn
-from lightconvpoint.datasets.s3dis import S3DIS_Pillar_Test as Dataset
+from lightconvpoint.datasets.semantic3d import Semantic8_Pillar_Test as Dataset
 
 from fkaconv.networks.kpconv import KPConvSeg as Network
 from fkaconv.networks.fusion import Fusion as NetworkFusion
@@ -48,9 +48,9 @@ def main(_config):
 
     savedir_root = _config['training']['savedir']
     device = torch.device(_config['misc']['device'])
-    rootdir = _config['dataset']['dir']
+    rootdir = _config['dataset']['dir_test']
 
-    N_CLASSES = 13
+    N_CLASSES = 8
 
     # create the network
     print("Creating the network...", end="", flush=True)
@@ -94,7 +94,7 @@ def main(_config):
                                             num_workers=_config['misc']['threads']
                                             )
 
-        filename = ds.filelist[file_id]
+        filename = ds.filelists['validation'][file_id]
 
         # create a score accumulator
         scores = np.zeros((ds.get_points().shape[0], N_CLASSES))
@@ -120,9 +120,6 @@ def main(_config):
 
         # get the original points
         original_points = ds.get_points()
-        original_labels = ds.get_labels()
-
-        # mask = np.logical_and((np.abs(scores).sum(1) > 0), np.argmax(scores, axis=1) == np.argmax(scores_noc, axis=1))
 
         # compute the mask of points seen at prediction time
         mask = (np.abs(scores).sum(1) > 0)
@@ -136,39 +133,18 @@ def main(_config):
                     torch.from_numpy(seen_scores).float().transpose(0,1), K=1).transpose(0,1).numpy()
         original_preds = np.argmax(scores, axis=1)
 
-        # confusion matrix
-        cm = confusion_matrix(original_labels, original_preds, labels=list(range(N_CLASSES)))
-        cm_global += cm
+        # save the results
+        step = _config["test"]["step"]
+        os.makedirs(os.path.join(savedir_root, f"results_{step}"), exist_ok=True)
+        save_fname = os.path.join(savedir_root, f"results_{step}", filename)
+        np.savetxt(save_fname,original_preds,fmt='%d')
 
-        print("IoU", metrics.stats_iou_per_class(cm)[0])
-
-        # saving results
-        savedir_results = os.path.join(savedir_root, f"results_step{_config['test']['step']}" ,filename)
-
-        # saving labels
-        if _config['test']['savepreds']:
-            os.makedirs(savedir_results, exist_ok=True)
-            np.savetxt(os.path.join(savedir_results, "pred.txt"), original_preds,fmt='%d')
-
+        # save the points
         if _config['test']['savepts']:
-            os.makedirs(savedir_results, exist_ok=True)
-            original_preds = np.expand_dims(original_preds,1).astype(int)
-            original_points = ds.get_points()
-            original_points = np.concatenate([original_points, original_preds], axis=1)
-            np.savetxt(os.path.join(savedir_results, "pts.txt"), original_points, fmt=['%.4f','%.4f','%.4f','%d','%d','%d','%d'])
-
-    print("WARNING: The next scores requires to be check with evaluation script at Convpoint repo")
-    print("TODO: check if OK with eval scrip")
-    iou = metrics.stats_iou_per_class(cm_global)
-    print("Global IoU")
-    print(iou[0])
-    print("Global IoU per class")
-    print(iou[1])
-
-    print(f"{iou[0]} ", end="", flush=True)
-    for i in range(iou[1].shape[0]):
-        print(f"{iou[1][i]} ", end="")
-    print("")
+            os.makedirs(os.path.join(savedir_root, f"results_{step}_pts"), exist_ok=True)
+            save_fname = os.path.join(savedir_root, f"results_{step}_pts", filename+".txt")
+            xyzrgb = np.concatenate([original_points, np.expand_dims(original_preds,1)], axis=1)
+            np.savetxt(save_fname, xyzrgb, fmt=['%.4f','%.4f','%.4f','%d'])
 
 
 if __name__ == "__main__":
