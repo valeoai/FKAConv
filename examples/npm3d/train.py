@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 import torch.utils.data
 
-from lightconvpoint.datasets.semantic3d import Semantic8_Pillar_TrainVal as Dataset
+from lightconvpoint.datasets.npm3d import NPM3D_Pillar_TrainVal as Dataset
 import lightconvpoint.utils.metrics as metrics
 from lightconvpoint.utils.network import get_conv, get_search
 import lightconvpoint.utils.transformations as lcp_transfo
@@ -26,7 +26,7 @@ from sacred.utils import apply_backspaces_and_linefeeds
 from sacred.config import save_config_file
 
 SETTINGS.CAPTURE_MODE = "sys"  # for tqdm
-ex = Experiment("Semantic8")
+ex = Experiment("NPM3D")
 ex.captured_out_filter = apply_backspaces_and_linefeeds  # for tqdm
 ex.add_config("config.yaml")
 ######
@@ -48,7 +48,7 @@ def main(_run, _config):
     # create the path to data
     rootdir = _config['dataset']['dir']
 
-    N_CLASSES = 8
+    N_CLASSES = 10
 
     # create the network
     print("Creating the network...", end="", flush=True)

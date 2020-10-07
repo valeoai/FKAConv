@@ -79,6 +79,9 @@ def main(_config):
     validation_transformations_data = []
     validation_transformations_features = []
 
+    if not _config['training']['rgb']:
+        validation_transformations_features.append(lcp_transfo.NoColor())
+
     ds = Dataset(rootdir, _config, split='validation', network_function=network_function,
             transformations_data=validation_transformations_data,
             transformations_features=validation_transformations_features)
