@@ -28,11 +28,17 @@ LightConvPoint shall be the base library for point cloud processing while FKACon
 pip install -ve /path/to/fkaconv/repository/
 ```
 
+## Dataset preparation
+
+Dataset are prepared according to the LightConvPoint data preparation.
+We use the provided dataloaders.
+
 ### Examples
 
 We provide examples classification and segmentation datasets:
-* ModelNet40
-* ShapeNet
-* S3DIS
-* Semantic8
-* NPM3D
+
+### ModelNet40
+### ShapeNet
+### S3DIS
+### Semantic8
+### NPM3D
