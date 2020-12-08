@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 import torch.utils.data
 
-from lightconvpoint.datasets.s3dis import S3DIS_Pillar_TrainVal as Dataset
+from lightconvpoint.datasets.s3dis import S3DIS_Pillar as Dataset
 import lightconvpoint.utils.metrics as metrics
 from lightconvpoint.utils.network import get_conv, get_search
 import lightconvpoint.utils.transformations as lcp_transfo

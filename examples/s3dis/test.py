@@ -15,7 +15,7 @@ import lightconvpoint.utils.metrics as metrics
 from lightconvpoint.utils.network import get_conv, get_search
 import lightconvpoint.utils.transformations as lcp_transfo
 from lightconvpoint.knn import knn
-from lightconvpoint.datasets.s3dis import S3DIS_Pillar_Test as Dataset
+from lightconvpoint.datasets.s3dis import S3DIS_Pillar as Dataset
 
 from fkaconv.networks.kpconv import KPConvSeg as Network
 from fkaconv.networks.fusion import Fusion as NetworkFusion
@@ -82,7 +82,7 @@ def main(_config):
     if not _config['training']['rgb']:
         validation_transformations_features.append(lcp_transfo.NoColor())
 
-    ds = Dataset(rootdir, _config, split='validation', network_function=network_function,
+    ds = Dataset(rootdir, _config, split='test', network_function=network_function,
             transformations_data=validation_transformations_data,
             transformations_features=validation_transformations_features)
 
