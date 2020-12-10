@@ -16,11 +16,9 @@ Please consider consider citing our ACCV 2020 paper:
 
 ## Dependencies
 
-FKAConv code is actually included in the [LightConvPoint framework repository](https://github.com/valeoai/LightConvPoint).
-
-It is aimed to change in a near future.
-
-LightConvPoint shall be the base library for point cloud processing while FKAConv shall became the repository dedicated to this specific work.
+FKAConv code uses [LightConvPoint](https://github.com/valeoai/LightConvPoint) as backend.
+Please note that we used the v0.2 for experiments.
+As the library is under develeopment, we do not garanty compatibility with current head. Please download the [v0.2 version](https://github.com/valeoai/LightConvPoint/releases/tag/v0.2).
 
 ## Installation
 
